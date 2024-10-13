@@ -52,7 +52,7 @@
         "school_year": "Junior",
         "major": "business",
         "apartment_option": "Accolade",
-        "age": 13,
+        "age": 18,
         "gender": "Male",
         "smoking_habits": "Non-smoker",
         "sleeping_habits": "Night owl",
@@ -65,5 +65,26 @@
         "roommate_year": "Junior",
         "night_person": true,
         "gatherings": "Likes to invite small groups"
+    },
+    "shreya": {
+        "password": "qwertyuiop",
+        "full_name": "SHREYA SUBRA",
+        "college": "cornell",
+        "school_year": "Senior",
+        "major": "cs",
+        "apartment_option": "via6",
+        "age": 25,
+        "gender": "Female",
+        "smoking_habits": "Regular smoker",
+        "sleeping_habits": "Both",
+        "guest_preferences": "I like having guests over frequently",
+        "has_pet": true,
+        "bio": "pets name is param",
+        "looking_for_roommate": "Yes",
+        "roommate_smoking": true,
+        "roommate_has_pets": true,
+        "roommate_year": "Any",
+        "night_person": true,
+        "gatherings": "Any"
     }
 }

@@ -125,7 +125,7 @@ if st.session_state.get('signup_mode'):
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], key="signup_school_year")
         major = st.text_input("Major", key="signup_major")
         apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching')", key="signup_apartment")
-        age = st.number_input("Age", min_value=13, max_value=100, key="signup_age")
+        age = st.number_input("Age", min_value=18, max_value=100, key="signup_age")
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], key="signup_gender")
         smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], key="signup_smoking")
         sleeping_habits = st.selectbox("Sleeping Habits", options=["Night owl", "Early bird", "Both"], key="signup_sleeping")
@@ -329,30 +329,33 @@ if 'username' in st.session_state:
                 st.write("No apartments match your preferences. Try adjusting the filters.")
 
     elif st.session_state.conversation_type == "roommate":
-        st.write("*Please provide your preferences for finding a roommate.*")
-        # Roommate preferences
-        roommate_gender = st.selectbox("Preferred Roommate Gender", options=["Any", "Male", "Female", "LBGTQIA+"])
-        allow_smoking = st.checkbox("Roommate can smoke?")
-        allow_pets_roommate = st.checkbox("Roommate can have pets?")
-        roommate_year = st.selectbox("Preferred Year", options=["Any", "Freshman", "Sophomore", "Junior", "Senior", "Other"])
-        night_person = st.checkbox("Night person?")
-        gatherings = st.selectbox("Guests?", options=["Any","Does not like having many guests over", "Likes to invite small groups", "Likes to have parties"])
+        st.write("*Finding a roommate based on your preferences...*")
         
-        if st.button("Submit Preferences"):
-            # Append the roommate preferences to the chat history
-            preferences = f"Looking for roommates. Preferred gender: {roommate_gender}, Can smoke: {allow_smoking}, Can have pets: {allow_pets_roommate}."
-            st.session_state.history.append({"role": "user", "parts": [{"text": preferences}]})
-            
+        # Load current user's data
+        current_user = users[st.session_state.username]
+
+        # Extract roommate preferences from the user profile
+        if current_user.get('looking_for_roommate') == "Yes":
+            roommate_gender = current_user.get('roommate_gender', 'Any')
+            allow_smoking = current_user.get('roommate_smoking', False)
+            allow_pets_roommate = current_user.get('roommate_has_pets', False)
+            roommate_year = current_user.get('roommate_year', 'Any')
+            night_person = current_user.get('night_person', False)
+            gatherings = current_user.get('gatherings', 'Any')
+
             # Display the user's preferences
             st.write(f"Searching for roommates with the following criteria:")
             st.write(f"**Preferred Gender:** {roommate_gender}")
             st.write(f"**Can Smoke:** {'Yes' if allow_smoking else 'No'}")
             st.write(f"**Can Have Pets:** {'Yes' if allow_pets_roommate else 'No'}")
             st.write(f"**Preferred Year:** {roommate_year}")
-            st.write(f"**Sleeping habits:** {'Yes' if night_person else 'No'}")
+            st.write(f"**Night Person:** {'Yes' if night_person else 'No'}")
             st.write(f"**Guest preferences:** {gatherings}")
+
+            # Generate a response from the chatbot based on the stored input
+            preferences = f"Looking for roommates. Preferred gender: {roommate_gender}, Can smoke: {allow_smoking}, Can have pets: {allow_pets_roommate}."
+            st.session_state.history.append({"role": "user", "parts": [{"text": preferences}]})
             
-            # Generate a response from the chatbot based on the input
             chat = model.start_chat(history=st.session_state.history)
             full_response = chat.send_message(preferences)
             st.session_state.history = chat.history
@@ -361,6 +364,8 @@ if 'username' in st.session_state:
             for message in full_response:
                 with st.chat_message("assistant"):
                     st.markdown(message['text'])
+        else:
+            st.write("It looks like you are not looking for a roommate based on your profile settings.")
 
     elif st.session_state.conversation_type == "tech Support":
         st.write("*Please provide more details for tech support.*")    
