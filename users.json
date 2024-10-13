@@ -28,5 +28,42 @@
         "guest_preferences": "I like having guests over frequently",
         "has_pet": false,
         "bio": "This is my bio"
+    },
+    "ashwin2": {
+        "password": "qwertyuiop",
+        "full_name": "Ashwin Subraonion",
+        "college": "Wash U",
+        "school_year": "Junior",
+        "major": "Econ",
+        "apartment_option": "Oliv",
+        "age": 14,
+        "gender": "Male",
+        "smoking_habits": "Non-smoker",
+        "sleeping_habits": "Night owl",
+        "guest_preferences": "I occasionally host people",
+        "has_pet": false,
+        "bio": "test",
+        "looking_for_roommate": "No"
+    },
+    "ashwin3": {
+        "password": "qwertyuiop",
+        "full_name": "ashwin subratomato",
+        "college": "duke",
+        "school_year": "Junior",
+        "major": "business",
+        "apartment_option": "Accolade",
+        "age": 13,
+        "gender": "Male",
+        "smoking_habits": "Non-smoker",
+        "sleeping_habits": "Night owl",
+        "guest_preferences": "I like having guests over frequently",
+        "has_pet": true,
+        "bio": "hvhvhv",
+        "looking_for_roommate": "Yes",
+        "roommate_smoking": false,
+        "roommate_has_pets": true,
+        "roommate_year": "Junior",
+        "night_person": true,
+        "gatherings": "Likes to invite small groups"
     }
 }

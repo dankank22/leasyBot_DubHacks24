@@ -124,7 +124,7 @@ if st.session_state.get('signup_mode'):
         college = st.text_input("College", key="signup_college")
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], key="signup_school_year")
         major = st.text_input("Major", key="signup_major")
-        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching'", key="signup_apartment")
+        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching')", key="signup_apartment")
         age = st.number_input("Age", min_value=13, max_value=100, key="signup_age")
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], key="signup_gender")
         smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], key="signup_smoking")
@@ -135,6 +135,16 @@ if st.session_state.get('signup_mode'):
 
         # File upload field for a .txt file
         txt_file = st.file_uploader("Upload a chat.txt file to automate roommate conversations", type="txt", key="signup_txt_file")
+
+        # Roommate related questions
+        looking_for_roommate = st.selectbox("Are you looking for a roommate?", options=["Yes", "No"], key="signup_looking_for_roommate")
+
+        if looking_for_roommate == "Yes":
+            roommate_smoking = st.checkbox("Roommate can smoke?", key="signup_roommate_smoking")
+            roommate_has_pets = st.checkbox("Roommate can have pets?", key="signup_roommate_has_pets")
+            roommate_year = st.selectbox("Preferred Year", options=["Any", "Freshman", "Sophomore", "Junior", "Senior", "Other"], key="signup_roommate_year")
+            night_person = st.checkbox("Night person?", key="signup_night_person")
+            gatherings = st.selectbox("Guests?", options=["Any", "Does not like having many guests over", "Likes to invite small groups", "Likes to have parties"], key="signup_gatherings")
         
         submit_button = st.form_submit_button("Sign Up")
 
@@ -147,7 +157,7 @@ if st.session_state.get('signup_mode'):
             st.error("Please upload a .txt file.")
         else:
             # Save the new user's credentials and profile
-            users[new_username] = {
+            user_data = {
                 'password': new_password,
                 'full_name': full_name,
                 'college': college,
@@ -160,8 +170,21 @@ if st.session_state.get('signup_mode'):
                 'sleeping_habits': sleeping_habits,
                 'guest_preferences': guest_preferences,
                 'has_pet': has_pet,
-                'bio': bio
+                'bio': bio,
+                'looking_for_roommate': looking_for_roommate
             }
+
+            # Add roommate preferences if the user is looking for a roommate
+            if looking_for_roommate == "Yes":
+                user_data.update({
+                    'roommate_smoking': roommate_smoking,
+                    'roommate_has_pets': roommate_has_pets,
+                    'roommate_year': roommate_year,
+                    'night_person': night_person,
+                    'gatherings': gatherings
+                })
+
+            users[new_username] = user_data
             save_users(users)
 
             # Save the uploaded .txt file in the 'txt' directory
