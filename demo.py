@@ -18,7 +18,10 @@ def load_user_txt(username):
     txt_path = f"txt/{username}.txt"
     if os.path.exists(txt_path):
         with open(txt_path, 'r', encoding='utf-8') as f:
-            return f.read()
+            content = f.read()
+            # half_length = len(content) // 8
+            # trimmed_content = content[:half_length]
+            return content
     else:
         return ""
     
@@ -373,35 +376,36 @@ if 'username' in st.session_state:
 
                     if st.button(f"Simulate Conversation with {match}"):
                         # Load txt files for both users
-                        # st.write("reading input data")
-                        # current_user_text = load_user_txt(st.session_state.username)
-                        # matched_user_text = load_user_txt(match)
+                        current_user_text = load_user_txt(st.session_state.username)
+                        matched_user_text = load_user_txt(match)
                         current_user_profile = users[st.session_state.username]
                         matched_user_profile = users[match]
                         current_user_info = format_profile(current_user_profile, "User A")
                         matched_user_info = format_profile(matched_user_profile, "User B")
                     
                     # Check if txt files are not empty
-                        # if not current_user_text:
-                        #     st.error(f"No texting style data found for {st.session_state.username}. Please upload a valid .txt file.")
-                        #     continue
-                        # if not matched_user_text:
-                        #     st.error(f"No texting style data found for {match}.")
-                        #     continue
+                        if not current_user_text:
+                            st.error(f"No texting style data found for {st.session_state.username}. Please upload a valid .txt file.")
+                            continue
+                        if not matched_user_text:
+                            st.error(f"No texting style data found for {match}.")
+                            continue
                         
                         # Prepare a prompt for the language model
-                        # st.write("loading prompt")
                         prompt = f"""
-                                You are to simulate a conversation between two users (you must use full names) who are meeting for the first time to discuss becoming roommates.
+                                You are to simulate a text conversation between two users (you must use full names, dont use user A and user B) who are texting for the first time to discuss becoming roommates.
 
+                                Base User A's texting style off this text exchange with their friend:
+                                {current_user_text}
+
+                                use this profile info for user a:
                                 {current_user_info}
 
+                                User B's texting style texting style off this text exchange with their friend:
+                                {matched_user_text}
+
+                                use this profile info for user b:
                                 {matched_user_info}
-
-                                Please generate a text conversation where each user speaks 10 lines in total. The conversation should reflect their personalities, preferences, and any common interests based on the profiles provided.
-
-                                Begin the conversation:
-
                                 """
                             # Ensure the API key is set
                         # if "app_key" not in st.session_state:
@@ -413,12 +417,10 @@ if 'username' in st.session_state:
 
                         # Configure the API key
                         if "app_key" in st.session_state:
-                            st.write("this works too?")
                             try:
                                 genai.configure(api_key=st.session_state.app_key)
                                 st.success("API key configured successfully.")
                                 model = genai.GenerativeModel("gemini-pro")
-                                st.write("Starting simulation:")
                                 # time.sleep(30)
                                 response = model.generate_content(prompt)
                                 st.write(response.text)

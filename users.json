@@ -61,5 +61,26 @@
         "roommate_year": "Any",
         "night_person": "Night owl",
         "gatherings": "I like having guests over frequently"
+    },
+    "spriha": {
+        "password": "qwertyuiop",
+        "full_name": "spriha sahni",
+        "college": "University of Washington",
+        "school_year": "Graduate",
+        "major": "HCDE",
+        "apartment_option": "olIv",
+        "age": 27,
+        "gender": "Non-binary",
+        "smoking_habits": true,
+        "sleeping_habits": "Early bird",
+        "guest_preferences": "I like having guests over frequently",
+        "has_pet": true,
+        "bio": "nbhkbjjb",
+        "looking_for_roommate": "Yes",
+        "roommate_smoking": false,
+        "roommate_has_pets": false,
+        "roommate_year": "Any",
+        "night_person": "Night owl",
+        "gatherings": "I like having guests over frequently"
     }
 }
