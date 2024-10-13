@@ -5,6 +5,7 @@
         "college": "University of Washington",
         "school_year": "Junior",
         "major": "Informatics",
+        "apartment_option": "Some Apartment",
         "age": 20,
         "gender": "Male",
         "smoking_habits": "Non-smoker",
@@ -12,5 +13,20 @@
         "guest_preferences": "I occasionally host people",
         "has_pet": false,
         "bio": "Hijvbfdkjvb sfjkbv s"
+    },
+    "ankith": {
+        "password": "jonsnow22",
+        "full_name": "Ankith",
+        "college": "University of Washington",
+        "school_year": "Junior",
+        "major": "Electrical and Computer Engineering",
+        "apartment_option": "Another Apartment",
+        "age": 20,
+        "gender": "Male",
+        "smoking_habits": "Non-smoker",
+        "sleeping_habits": "Night owl",
+        "guest_preferences": "I like having guests over frequently",
+        "has_pet": false,
+        "bio": ""
     }
 }

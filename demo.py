@@ -132,6 +132,7 @@ if st.session_state.get('signup_mode'):
         college = st.text_input("College", key="signup_college")
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], key="signup_school_year")
         major = st.text_input("Major", key="signup_major")
+        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching", key="signup_apartment")
         age = st.number_input("Age", min_value=13, max_value=100, key="signup_age")
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], key="signup_gender")
         smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], key="signup_smoking")
@@ -155,6 +156,7 @@ if st.session_state.get('signup_mode'):
                 'college': college,
                 'school_year': school_year,
                 'major': major,
+                'apartment_option': apartment_option,
                 'age': age,
                 'gender': gender,
                 'smoking_habits': smoking_habits,
@@ -180,6 +182,7 @@ if 'username' in st.session_state and st.session_state.get('show_profile', False
         college = st.text_input("College", value=current_user['college'])
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], index=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"].index(current_user['school_year']))
         major = st.text_input("Major", value=current_user['major'])
+        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching')", value=current_user['apartment_option'])
         age = st.number_input("Age", min_value=13, max_value=100, value=current_user['age'])
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], index=["Male", "Female", "Non-binary", "Prefer not to say", "Other"].index(current_user['gender']))
         smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], index=["Non-smoker", "Occasional smoker", "Regular smoker"].index(current_user['smoking_habits']))
@@ -197,6 +200,7 @@ if 'username' in st.session_state and st.session_state.get('show_profile', False
             'college': college,
             'school_year': school_year,
             'major': major,
+            'apartment_option': apartment_option,
             'age': age,
             'gender': gender,
             'smoking_habits': smoking_habits,
