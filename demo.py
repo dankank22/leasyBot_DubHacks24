@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit_authenticator as stauth
 import pydeck as pdk
 
+# using this as a test comment
 # Load apartment data from an Excel file
 def load_apartment_data(file_path):
     try:
@@ -17,7 +18,6 @@ apartment_data = load_apartment_data('Apartment_DB.xlsx')
 
 st.set_page_config(
     page_title="LeasyBot",
-    
 )
 
 st.title("Chat with LeasyBot")
