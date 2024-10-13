@@ -243,16 +243,116 @@ if 'username' in st.session_state:
     
     # Handling different conversation types
     if st.session_state.conversation_type == "apartment":
-        # Your existing code for apartment search
-        pass  # Replace with your existing apartment code
+        st.write("*Please adjust the sliders and options to define your preferences.*")
+    
+    # User Inputs for apartment
+        price_range = st.slider("What is your budget range?", 500, 3000, (900, 1400))
+        num_bedrooms = st.slider("How many bedrooms are you looking for?", 1, 6, (1,2))
+        allow_pets = st.checkbox("Do you have a pet?")
+        need_parking = st.checkbox("Do you require parking?")
+        need_gym = st.checkbox("Do you require a gym?")
+        
+        if st.button("Submit Preferences"):
+            preferences = f"Looking for apartments with a budget range of {price_range[0]} to {price_range[1]}, with {num_bedrooms} bedrooms. Pets allowed: {allow_pets}, Parking needed: {need_parking}, Gym: {need_gym}."
+            st.session_state.history.append({"role": "user", "parts": [{"text": preferences}]})
+        
+            
+            filtered_apartments = apartment_data[
+                (apartment_data['Cost'] >= price_range[0]) &
+                (apartment_data['Cost'] <= price_range[1]) &
+                (apartment_data['Bedrooms'] >= num_bedrooms[0]) &
+                (apartment_data['Bedrooms'] <= num_bedrooms[1]) &
+                (apartment_data['Allow Pets?'].astype(bool) == allow_pets if allow_pets else True) &  
+                (apartment_data['Parking?'].astype(bool) == need_parking if need_parking else True) & 
+                (apartment_data['Gymnasium?'].astype(bool) == need_gym if need_gym else True)        
+            ]
+            # Check if filtered apartments are available
+            if not filtered_apartments.empty:
+                st.write("### Apartments that match your preferences:")
+                st.dataframe(filtered_apartments)
+                # Extract latitude and longitude
+                if 'Latitude' in filtered_apartments.columns and 'Longitude' in filtered_apartments.columns:
+                    map_data = filtered_apartments[['Latitude', 'Longitude']].dropna()
+                    map_data = map_data.rename(columns={'Latitude': 'latitude', 'Longitude': 'longitude'})
+                    map_data = map_data.astype({'latitude': 'float', 'longitude': 'float'})
+                    if not map_data.empty:
+                        # Define a Pydeck layer with smaller circle markers
+                        layer = pdk.Layer(
+                            'ScatterplotLayer',
+                            data=map_data,
+                            get_position='[longitude, latitude]',
+                            get_color='[200, 30, 0, 160]',  # Red color with some transparency
+                            get_radius=50,  # Radius of each circle (in meters)
+                            pickable=True,  # Enables interactivity
+                        )
+                        # Create the Pydeck map
+                        view_state = pdk.ViewState(
+                            latitude=map_data['latitude'].mean(),
+                            longitude=map_data['longitude'].mean(),
+                            zoom=12,  # Adjust zoom for a better view
+                            pitch=0
+                        )
+                        # Render the map with Pydeck
+                        st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state))
+                    else:
+                        st.write("No valid coordinates available for the selected apartments.")
+                else:
+                    st.write("Latitude and Longitude data not found in the filtered results.")
+            else:
+                st.write("No apartments match your preferences. Try adjusting the filters.")
 
     elif st.session_state.conversation_type == "roommate":
-        # Your existing code for roommate search
-        pass  # Replace with your existing roommate code
+        st.write("*Please provide your preferences for finding a roommate.*")
+        # Roommate preferences
+        roommate_gender = st.selectbox("Preferred Roommate Gender", options=["Any", "Male", "Female", "LBGTQIA+"])
+        allow_smoking = st.checkbox("Roommate can smoke?")
+        allow_pets_roommate = st.checkbox("Roommate can have pets?")
+        roommate_year = st.selectbox("Preferred Year", options=["Any", "Freshman", "Sophomore", "Junior", "Senior", "Other"])
+        night_person = st.checkbox("Night person?")
+        gatherings = st.selectbox("Guests?", options=["Any","Does not like having many guests over", "Likes to invite small groups", "Likes to have parties"])
+        
+        if st.button("Submit Preferences"):
+            # Append the roommate preferences to the chat history
+            preferences = f"Looking for roommates. Preferred gender: {roommate_gender}, Can smoke: {allow_smoking}, Can have pets: {allow_pets_roommate}."
+            st.session_state.history.append({"role": "user", "parts": [{"text": preferences}]})
+            
+            # Display the user's preferences
+            st.write(f"Searching for roommates with the following criteria:")
+            st.write(f"**Preferred Gender:** {roommate_gender}")
+            st.write(f"**Can Smoke:** {'Yes' if allow_smoking else 'No'}")
+            st.write(f"**Can Have Pets:** {'Yes' if allow_pets_roommate else 'No'}")
+            st.write(f"**Preferred Year:** {roommate_year}")
+            st.write(f"**Sleeping habits:** {'Yes' if night_person else 'No'}")
+            st.write(f"**Guest preferences:** {gatherings}")
+            
+            # Generate a response from the chatbot based on the input
+            chat = model.start_chat(history=st.session_state.history)
+            full_response = chat.send_message(preferences)
+            st.session_state.history = chat.history
+            
+            # Display the chatbot's response
+            for message in full_response:
+                with st.chat_message("assistant"):
+                    st.markdown(message['text'])
 
     elif st.session_state.conversation_type == "tech Support":
-        # Your existing code for tech support
-        pass  # Replace with your existing tech support code
+        st.write("*Please provide more details for tech support.*")    
+        # User input for tech support
+        issue_description = st.text_area("Describe the issue you're facing:")
+        
+        if st.button("Submit Issue"):
+            # Append the tech support issue to the chat history
+            st.session_state.history.append({"role": "user", "parts": [{"text": issue_description}]})
+            
+            # Generate a response from the chatbot based on the input
+            chat = model.start_chat(history=st.session_state.history)
+            full_response = chat.send_message(issue_description)
+            st.session_state.history = chat.history
+            
+            # Display the chatbot's response
+            for message in full_response:
+                with st.chat_message("assistant"):
+                    st.markdown(message['text'])
 
 else:
     st.write("Please log in to use the application.")
