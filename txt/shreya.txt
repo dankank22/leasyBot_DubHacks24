@@ -116,7 +116,7 @@ DNA.java:24: error: ';' expected
 [4/10/23, 11:29:14 PM] RP: if u want u come say hi lol
 [4/10/23, 11:29:21 PM] RP: arya only told me to come off
 [4/10/23, 11:29:21 PM] Ashwin: who 8
-[4/10/23, 11:29:32 PM] Ashwin: jasleen oorjit?
+[4/10/23, 11:29:32 PM] Ashwin: jasleen ishika?
 [4/10/23, 11:30:15 PM] RP: yes
 [4/10/23, 11:30:27 PM] RP: where aari
 [4/20/23, 4:43:32 PM] Ashwin: // Program that creates a music playlist and facilitates functions like adding songs,

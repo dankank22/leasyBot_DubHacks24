@@ -22,10 +22,10 @@ st.set_page_config(
 st.title("Chat with LeasyBot")
 st.caption("A Chatbot Powered by Google Gemini Pro")
 
-if "app_key" not in st.session_state:
-    app_key = st.text_input("Please enter your Gemini API Key", type='password')
-    if app_key:
-        st.session_state.app_key = app_key
+# if "app_key" not in st.session_state:
+#     app_key = st.text_input("Please enter your Gemini API Key", type='password')
+#     if app_key:
+#         st.session_state.app_key = app_key
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -33,12 +33,12 @@ if "history" not in st.session_state:
 if "conversation_type" not in st.session_state:
     st.session_state.conversation_type = None
 
-try:
-    genai.configure(api_key=st.session_state.app_key)
-except AttributeError as e:
-    st.warning("Please Put Your Gemini API Key First")
+# try:
+#     genai.configure(api_key=st.session_state.app_key)
+# except AttributeError as e:
+#     st.warning("Please Put Your Gemini API Key First")
 
-model = genai.GenerativeModel("gemini-pro")
+# model = genai.GenerativeModel("gemini-pro")
 
 USERS_FILE = 'users.json'
 
@@ -341,20 +341,46 @@ if 'username' in st.session_state:
             for username, user_data in users.items():
                 if username != st.session_state.username and user_data.get('looking_for_roommate') == "Yes":
                     # Check if the user fits the criteria
-                    if (user_data.get('smoking_habits') == current_user.get('roommate_smoking') and
-                        user_data.get('has_pet') == current_user.get('roommate_has_pets') and
-                        user_data.get('school_year') == current_user.get('roommate_year') and
-                        user_data.get('sleeping_habits') == current_user.get('night_person') and
-                        user_data.get('guest_preferences') == current_user.get('gatherings')):
-                        matching_users.append(username)
+                    count = 0
+                    if user_data.get('smoking_habits') == current_user.get('roommate_smoking'):
+                        count += 1
+                    if user_data.get('has_pet') == current_user.get('roommate_has_pets'):
+                        count += 1
+                    if user_data.get('school_year') == current_user.get('roommate_year'):
+                        count += 1
+                    if user_data.get('sleeping_habits') == current_user.get('night_person'):
+                        count += 1
+                    if user_data.get('guest_preferences') == current_user.get('gatherings'):
+                        count += 1
+
+                    # Append matching user and their match count
+                    if count > 0:  # Only add users with at least one match
+                        matching_users.append((username, count))
+
+            # Sort matching users by count in descending order
+            matching_users.sort(key=lambda x: x[1], reverse=True)
 
             # Display matching users with "Simulate Conversation" button
             if matching_users:
-                for match in matching_users:
-                    st.write(f"**Username**: {match}")
+                for match, count in matching_users:
+                    st.write(f"**Username**: {match}, **Matches**: {count}")
+
                     if st.button(f"Simulate Conversation with {match}"):
-                        st.write(f"Simulating conversation with {match}...")
-                        # Here you would add the logic to simulate a conversation
+                        # Ensure the API key is set
+                        if "app_key" not in st.session_state:
+                            app_key = st.text_input("Please enter your Gemini API Key", type='password')
+                            if app_key:
+                                st.session_state.app_key = app_key
+
+                        # Configure the API key
+                        if "app_key" in st.session_state:
+                            try:
+                                genai.configure(api_key=st.session_state.app_key)
+                                st.success("API key configured successfully.")
+                            except AttributeError:
+                                st.warning("Please put your Gemini API Key first.")
+                                continue  # Skip the rest of this iteration if the API key isn't valid
+                            
             else:
                 st.write("No matching roommates found based on your preferences.")
         else:
@@ -362,22 +388,22 @@ if 'username' in st.session_state:
 
     elif st.session_state.conversation_type == "tech Support":
         st.write("*Please provide more details for tech support.*")    
-        # User input for tech support
-        issue_description = st.text_area("Describe the issue you're facing:")
+        # # User input for tech support
+        # issue_description = st.text_area("Describe the issue you're facing:")
         
-        if st.button("Submit Issue"):
-            # Append the tech support issue to the chat history
-            st.session_state.history.append({"role": "user", "parts": [{"text": issue_description}]})
+        # if st.button("Submit Issue"):
+        #     # Append the tech support issue to the chat history
+        #     st.session_state.history.append({"role": "user", "parts": [{"text": issue_description}]})
             
-            # Generate a response from the chatbot based on the input
-            chat = model.start_chat(history=st.session_state.history)
-            full_response = chat.send_message(issue_description)
-            st.session_state.history = chat.history
+        #     # Generate a response from the chatbot based on the input
+        #     chat = model.start_chat(history=st.session_state.history)
+        #     full_response = chat.send_message(issue_description)
+        #     st.session_state.history = chat.history
             
-            # Display the chatbot's response
-            for message in full_response:
-                with st.chat_message("assistant"):
-                    st.markdown(message['text'])
+        #     # Display the chatbot's response
+        #     for message in full_response:
+        #         with st.chat_message("assistant"):
+        #             st.markdown(message['text'])
 
 else:
     st.write("Please log in to use the application.")
