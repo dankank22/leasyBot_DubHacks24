@@ -55,8 +55,7 @@ if "app_key" not in st.session_state:
     app_key = st.text_input("Please enter your Gemini API Key", type='password')
     if app_key:
         st.session_state.app_key = app_key
-        st.write(st.session_state.app_key)
-
+        
 if "history" not in st.session_state:
     st.session_state.history = []
 
