@@ -4,6 +4,7 @@ import pandas as pd
 import pydeck as pdk
 import json
 import os
+import time
 
 def load_apartment_data(file_path):
     try:
@@ -12,6 +13,31 @@ def load_apartment_data(file_path):
     except Exception as e:
         st.error(f"Error loading file: {e}")
         return pd.DataFrame() 
+
+def load_user_txt(username):
+    txt_path = f"txt/{username}.txt"
+    if os.path.exists(txt_path):
+        with open(txt_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    else:
+        return ""
+    
+def format_profile(user_profile, user_label):
+    profile_info = f"""
+                    {user_label}'s Profile:
+                    - Full Name: {user_profile.get('full_name', 'N/A')}
+                    - Age: {user_profile.get('age', 'N/A')}
+                    - Gender: {user_profile.get('gender', 'N/A')}
+                    - College: {user_profile.get('college', 'N/A')}
+                    - Major: {user_profile.get('major', 'N/A')}
+                    - School Year: {user_profile.get('school_year', 'N/A')}
+                    - Smoking Habits: {user_profile.get('smoking_habits', 'N/A')}
+                    - Sleeping Habits: {user_profile.get('sleeping_habits', 'N/A')}
+                    - Guest Preferences: {user_profile.get('guest_preferences', 'N/A')}
+                    - Has Pet: {'Yes' if user_profile.get('has_pet') else 'No'}
+                    - Bio: {user_profile.get('bio', 'N/A')}
+                    """
+    return profile_info
 
 apartment_data = load_apartment_data('Apartment_DB.xlsx')
 
@@ -22,10 +48,11 @@ st.set_page_config(
 st.title("Chat with LeasyBot")
 st.caption("A Chatbot Powered by Google Gemini Pro")
 
-# if "app_key" not in st.session_state:
-#     app_key = st.text_input("Please enter your Gemini API Key", type='password')
-#     if app_key:
-#         st.session_state.app_key = app_key
+if "app_key" not in st.session_state:
+    app_key = st.text_input("Please enter your Gemini API Key", type='password')
+    if app_key:
+        st.session_state.app_key = app_key
+        st.write(st.session_state.app_key)
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -33,12 +60,12 @@ if "history" not in st.session_state:
 if "conversation_type" not in st.session_state:
     st.session_state.conversation_type = None
 
-# try:
-#     genai.configure(api_key=st.session_state.app_key)
-# except AttributeError as e:
-#     st.warning("Please Put Your Gemini API Key First")
+try:
+    genai.configure(api_key=st.session_state.app_key)
+except AttributeError as e:
+    st.warning("Please Put Your Gemini API Key First")
 
-# model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-pro")
 
 USERS_FILE = 'users.json'
 
@@ -366,20 +393,62 @@ if 'username' in st.session_state:
                     st.write(f"**Username**: {match}, **Matches**: {count}")
 
                     if st.button(f"Simulate Conversation with {match}"):
-                        # Ensure the API key is set
-                        if "app_key" not in st.session_state:
-                            app_key = st.text_input("Please enter your Gemini API Key", type='password')
-                            if app_key:
-                                st.session_state.app_key = app_key
+                        # Load txt files for both users
+                        # st.write("reading input data")
+                        # current_user_text = load_user_txt(st.session_state.username)
+                        # matched_user_text = load_user_txt(match)
+                        current_user_profile = users[st.session_state.username]
+                        matched_user_profile = users[match]
+                        current_user_info = format_profile(current_user_profile, "User A")
+                        matched_user_info = format_profile(matched_user_profile, "User B")
+                    
+                    # Check if txt files are not empty
+                        # if not current_user_text:
+                        #     st.error(f"No texting style data found for {st.session_state.username}. Please upload a valid .txt file.")
+                        #     continue
+                        # if not matched_user_text:
+                        #     st.error(f"No texting style data found for {match}.")
+                        #     continue
+                        
+                        # Prepare a prompt for the language model
+                        # st.write("loading prompt")
+                        prompt = f"""
+                                You are to simulate a conversation between two users who are meeting for the first time to discuss becoming roommates.
+
+                                {current_user_info}
+
+                                {matched_user_info}
+
+                                Please generate a conversation where each user speaks 3 lines in total. The conversation should reflect their personalities, preferences, and any common interests based on the profiles provided.
+
+                                Begin the conversation:
+
+                                """
+                            # Ensure the API key is set
+                        # if "app_key" not in st.session_state:
+                        #     app_key = st.text_input("Please enter your Gemini API Key", type='password')
+                        #     st.write(app_key)
+                        #     if app_key:
+                        #         st.write("does api key register?")
+                        #         st.session_state.app_key = app_key
 
                         # Configure the API key
                         if "app_key" in st.session_state:
+                            st.write("this works too?")
                             try:
                                 genai.configure(api_key=st.session_state.app_key)
                                 st.success("API key configured successfully.")
-                            except AttributeError:
-                                st.warning("Please put your Gemini API Key first.")
-                                continue  # Skip the rest of this iteration if the API key isn't valid
+                                model = genai.GenerativeModel("gemini-pro")
+                                st.write("Starting simulation:")
+                                # time.sleep(30)
+                                response = model.generate_content(prompt)
+                                st.write(response.text)
+                                # Display the conversation
+                                # generated_conversation = response.candidates[0]['output']
+                                # st.write("Done")
+                                # st.write(generated_conversation)
+                            except Exception as e:
+                                st.error(f"Error generating conversation: {e}")
                             
             else:
                 st.write("No matching roommates found based on your preferences.")
