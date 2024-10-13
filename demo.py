@@ -19,8 +19,6 @@ def load_user_txt(username):
     if os.path.exists(txt_path):
         with open(txt_path, 'r', encoding='utf-8') as f:
             content = f.read()
-            # half_length = len(content) // 8
-            # trimmed_content = content[:half_length]
             return content
     else:
         return ""
@@ -406,15 +404,7 @@ if 'username' in st.session_state:
                                 use this profile info for user b:
                                 {matched_user_info}
                                 """
-                            # Ensure the API key is set
-                        # if "app_key" not in st.session_state:
-                        #     app_key = st.text_input("Please enter your Gemini API Key", type='password')
-                        #     st.write(app_key)
-                        #     if app_key:
-                        #         st.write("does api key register?")
-                        #         st.session_state.app_key = app_key
 
-                        # Configure the API key
                         if "app_key" in st.session_state:
                             try:
                                 genai.configure(api_key=st.session_state.app_key)
@@ -437,22 +427,22 @@ if 'username' in st.session_state:
 
     elif st.session_state.conversation_type == "tech Support":
         st.write("*Please provide more details for tech support.*")    
-        # # User input for tech support
-        # issue_description = st.text_area("Describe the issue you're facing:")
+        # User input for tech support
+        issue_description = st.text_area("Describe the issue you're facing:")
         
-        # if st.button("Submit Issue"):
-        #     # Append the tech support issue to the chat history
-        #     st.session_state.history.append({"role": "user", "parts": [{"text": issue_description}]})
+        if st.button("Submit Issue"):
+            # Append the tech support issue to the chat history
+            st.session_state.history.append({"role": "user", "parts": [{"text": issue_description}]})
             
-        #     # Generate a response from the chatbot based on the input
-        #     chat = model.start_chat(history=st.session_state.history)
-        #     full_response = chat.send_message(issue_description)
-        #     st.session_state.history = chat.history
+            # Generate a response from the chatbot based on the input
+            chat = model.start_chat(history=st.session_state.history)
+            full_response = chat.send_message(issue_description)
+            st.session_state.history = chat.history
             
-        #     # Display the chatbot's response
-        #     for message in full_response:
-        #         with st.chat_message("assistant"):
-        #             st.markdown(message['text'])
+            # Display the chatbot's response
+            for message in full_response:
+                with st.chat_message("assistant"):
+                    st.markdown(message['text'])
 
 else:
     st.write("Please log in to use the application.")
