@@ -111,7 +111,7 @@ if st.session_state.get('login_mode'):
         else:
             st.error("Invalid username or password")
 
-# Sign Up Form
+#Sign Up Form
 if st.session_state.get('signup_mode'):
     with st.form("signup_form"):
         st.write("**Create a New Account**")
@@ -127,9 +127,9 @@ if st.session_state.get('signup_mode'):
         apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching')", key="signup_apartment")
         age = st.number_input("Age", min_value=18, max_value=100, key="signup_age")
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], key="signup_gender")
-        smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], key="signup_smoking")
-        sleeping_habits = st.selectbox("Sleeping Habits", options=["Night owl", "Early bird", "Both"], key="signup_sleeping")
-        guest_preferences = st.selectbox("Guest Preferences", options=["I like having guests over frequently", "I occasionally host people", "No guests"], key="signup_guests")
+        smoking_habits = st.checkbox("Do you smoke?", key="signup_smoking")
+        sleeping_habits = st.selectbox("Sleeping Habits?", options=["Night owl", "Early bird", "Both"], key="signup_sleeping")
+        guest_preferences = st.selectbox("Guest Preferences?", options=["I like having guests over frequently", "I occasionally host people", "No guests"], key="signup_guests")
         has_pet = st.checkbox("Do you have a pet?", key="signup_pet")
         bio = st.text_area("Tell us about yourself", key="signup_bio")
 
@@ -143,8 +143,8 @@ if st.session_state.get('signup_mode'):
             roommate_smoking = st.checkbox("Roommate can smoke?", key="signup_roommate_smoking")
             roommate_has_pets = st.checkbox("Roommate can have pets?", key="signup_roommate_has_pets")
             roommate_year = st.selectbox("Preferred Year", options=["Any", "Freshman", "Sophomore", "Junior", "Senior", "Other"], key="signup_roommate_year")
-            night_person = st.checkbox("Night person?", key="signup_night_person")
-            gatherings = st.selectbox("Guests?", options=["Any", "Does not like having many guests over", "Likes to invite small groups", "Likes to have parties"], key="signup_gatherings")
+            night_person = st.selectbox("Sleeping Habits", options=["Night owl", "Early bird", "Both"], key="signup_night_person")
+            gatherings = st.selectbox("Guests?", options=["I like having guests over frequently", "I occasionally host people", "No guests"], key="signup_gatherings")
         
         submit_button = st.form_submit_button("Sign Up")
 
@@ -330,40 +330,33 @@ if 'username' in st.session_state:
 
     elif st.session_state.conversation_type == "roommate":
         st.write("*Finding a roommate based on your preferences...*")
-        
+
         # Load current user's data
         current_user = users[st.session_state.username]
 
-        # Extract roommate preferences from the user profile
+        # Ensure user is looking for a roommate
         if current_user.get('looking_for_roommate') == "Yes":
-            roommate_gender = current_user.get('roommate_gender', 'Any')
-            allow_smoking = current_user.get('roommate_smoking', False)
-            allow_pets_roommate = current_user.get('roommate_has_pets', False)
-            roommate_year = current_user.get('roommate_year', 'Any')
-            night_person = current_user.get('night_person', False)
-            gatherings = current_user.get('gatherings', 'Any')
+            # Filter matching users
+            matching_users = []
+            for username, user_data in users.items():
+                if username != st.session_state.username and user_data.get('looking_for_roommate') == "Yes":
+                    # Check if the user fits the criteria
+                    if (user_data.get('smoking_habits') == current_user.get('roommate_smoking') and
+                        user_data.get('has_pet') == current_user.get('roommate_has_pets') and
+                        user_data.get('school_year') == current_user.get('roommate_year') and
+                        user_data.get('sleeping_habits') == current_user.get('night_person') and
+                        user_data.get('guest_preferences') == current_user.get('gatherings')):
+                        matching_users.append(username)
 
-            # Display the user's preferences
-            st.write(f"Searching for roommates with the following criteria:")
-            st.write(f"**Preferred Gender:** {roommate_gender}")
-            st.write(f"**Can Smoke:** {'Yes' if allow_smoking else 'No'}")
-            st.write(f"**Can Have Pets:** {'Yes' if allow_pets_roommate else 'No'}")
-            st.write(f"**Preferred Year:** {roommate_year}")
-            st.write(f"**Night Person:** {'Yes' if night_person else 'No'}")
-            st.write(f"**Guest preferences:** {gatherings}")
-
-            # Generate a response from the chatbot based on the stored input
-            preferences = f"Looking for roommates. Preferred gender: {roommate_gender}, Can smoke: {allow_smoking}, Can have pets: {allow_pets_roommate}."
-            st.session_state.history.append({"role": "user", "parts": [{"text": preferences}]})
-            
-            chat = model.start_chat(history=st.session_state.history)
-            full_response = chat.send_message(preferences)
-            st.session_state.history = chat.history
-            
-            # Display the chatbot's response
-            for message in full_response:
-                with st.chat_message("assistant"):
-                    st.markdown(message['text'])
+            # Display matching users with "Simulate Conversation" button
+            if matching_users:
+                for match in matching_users:
+                    st.write(f"**Username**: {match}")
+                    if st.button(f"Simulate Conversation with {match}"):
+                        st.write(f"Simulating conversation with {match}...")
+                        # Here you would add the logic to simulate a conversation
+            else:
+                st.write("No matching roommates found based on your preferences.")
         else:
             st.write("It looks like you are not looking for a roommate based on your profile settings.")
 
