@@ -5,7 +5,6 @@ import pydeck as pdk
 import json
 import os
 
-# Load apartment data from an Excel file
 def load_apartment_data(file_path):
     try:
         df = pd.read_excel(file_path)
@@ -23,7 +22,6 @@ st.set_page_config(
 st.title("Chat with LeasyBot")
 st.caption("A Chatbot Powered by Google Gemini Pro")
 
-# Ensure the session state for the API key and conversation history
 if "app_key" not in st.session_state:
     app_key = st.text_input("Please enter your Gemini API Key", type='password')
     if app_key:
@@ -35,7 +33,6 @@ if "history" not in st.session_state:
 if "conversation_type" not in st.session_state:
     st.session_state.conversation_type = None
 
-# Initialize the chatbot API if the API key is available
 try:
     genai.configure(api_key=st.session_state.app_key)
 except AttributeError as e:
@@ -43,10 +40,8 @@ except AttributeError as e:
 
 model = genai.GenerativeModel("gemini-pro")
 
-# Path to the JSON file
 USERS_FILE = 'users.json'
 
-# Function to load users from the JSON file
 def load_users():
     if os.path.exists(USERS_FILE):
         with open(USERS_FILE, 'r') as f:
@@ -54,17 +49,15 @@ def load_users():
     else:
         return {}
 
-# Function to save users to the JSON file
 def save_users(users):
     with open(USERS_FILE, 'w') as f:
         json.dump(users, f, indent=4)
 
-# Initialize session state variables
 if "signup_mode" not in st.session_state:
-    st.session_state.signup_mode = False  # Toggle for showing the sign-up form
+    st.session_state.signup_mode = False  
 
 if "login_mode" not in st.session_state:
-    st.session_state.login_mode = False  # Toggle for showing the login form
+    st.session_state.login_mode = False 
 
 users = load_users()
 
@@ -94,7 +87,6 @@ with st.sidebar:
             st.session_state.conversation_type = None
             st.success("Logged out successfully!")
     else:
-        # Toggle between sign-in and sign-up modes
         if st.button("Sign In", icon="🔑", use_container_width=True):
             st.session_state.signup_mode = False
             st.session_state.login_mode = True
@@ -132,7 +124,7 @@ if st.session_state.get('signup_mode'):
         college = st.text_input("College", key="signup_college")
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], key="signup_school_year")
         major = st.text_input("Major", key="signup_major")
-        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching", key="signup_apartment")
+        apartment_option = st.text_input("Where have you signed at? (If you have not found an apartment, enter 'Still Searching'", key="signup_apartment")
         age = st.number_input("Age", min_value=13, max_value=100, key="signup_age")
         gender = st.selectbox("Gender", options=["Male", "Female", "Non-binary", "Prefer not to say", "Other"], key="signup_gender")
         smoking_habits = st.selectbox("Smoking Habits", options=["Non-smoker", "Occasional smoker", "Regular smoker"], key="signup_smoking")
@@ -140,6 +132,9 @@ if st.session_state.get('signup_mode'):
         guest_preferences = st.selectbox("Guest Preferences", options=["I like having guests over frequently", "I occasionally host people", "No guests"], key="signup_guests")
         has_pet = st.checkbox("Do you have a pet?", key="signup_pet")
         bio = st.text_area("Tell us about yourself", key="signup_bio")
+
+        # File upload field for a .txt file
+        txt_file = st.file_uploader("Upload a chat.txt file to automate roommate conversations", type="txt", key="signup_txt_file")
         
         submit_button = st.form_submit_button("Sign Up")
 
@@ -148,6 +143,8 @@ if st.session_state.get('signup_mode'):
             st.error("Passwords do not match!")
         elif new_username in users:
             st.error("Username already exists! Please choose a different one.")
+        elif txt_file is None:
+            st.error("Please upload a .txt file.")
         else:
             # Save the new user's credentials and profile
             users[new_username] = {
@@ -166,6 +163,11 @@ if st.session_state.get('signup_mode'):
                 'bio': bio
             }
             save_users(users)
+
+            # Save the uploaded .txt file in the 'txt' directory
+            with open(f"txt/{new_username}.txt", "wb") as f:
+                f.write(txt_file.getbuffer())
+
             st.success(f"Account created successfully for {full_name}!")
             st.session_state.signup_mode = False  # Close sign-up form after success
 
@@ -209,8 +211,10 @@ if 'username' in st.session_state and st.session_state.get('show_profile', False
             'has_pet': has_pet,
             'bio': bio
         })
-        save_users(users)
+        print(users[st.session_state.username])
+        save_users(users)  # Save updated user data to JSON
         st.success("Profile updated successfully!")
+
 
 # Main Application Logic
 if 'username' in st.session_state:
