@@ -1,0 +1,4 @@
+streamlit
+google-generative-ai
+pandas
+pydeck
