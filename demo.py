@@ -146,7 +146,7 @@ if st.session_state.get('signup_mode'):
         new_password = st.text_input("Choose a password", type='password', key="signup_password")
         confirm_password = st.text_input("Confirm password", type='password', key="signup_confirm_password")
         
-        # Profile Information
+        # profile info
         full_name = st.text_input("Full Name", key="signup_full_name")
         college = st.text_input("College", key="signup_college")
         school_year = st.selectbox("School Year", options=["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"], key="signup_school_year")
@@ -160,10 +160,9 @@ if st.session_state.get('signup_mode'):
         has_pet = st.checkbox("Do you have a pet?", key="signup_pet")
         bio = st.text_area("Tell us about yourself", key="signup_bio")
 
-        # File upload field for a .txt file
+        # .txt file
         txt_file = st.file_uploader("Upload a chat.txt file to automate roommate conversations", type="txt", key="signup_txt_file")
 
-        # Roommate related questions
         looking_for_roommate = st.selectbox("Are you looking for a roommate?", options=["Yes", "No"], key="signup_looking_for_roommate")
 
         if looking_for_roommate == "Yes":
@@ -183,7 +182,7 @@ if st.session_state.get('signup_mode'):
         elif txt_file is None:
             st.error("Please upload a .txt file.")
         else:
-            # Save the new user's credentials and profile
+            # save creds
             user_data = {
                 'password': new_password,
                 'full_name': full_name,
@@ -201,7 +200,6 @@ if st.session_state.get('signup_mode'):
                 'looking_for_roommate': looking_for_roommate
             }
 
-            # Add roommate preferences if the user is looking for a roommate
             if looking_for_roommate == "Yes":
                 user_data.update({
                     'roommate_smoking': roommate_smoking,
@@ -214,21 +212,18 @@ if st.session_state.get('signup_mode'):
             users[new_username] = user_data
             save_users(users)
 
-            # Save the uploaded .txt file in the 'txt' directory
             with open(f"txt/{new_username}.txt", "wb") as f:
                 f.write(txt_file.getbuffer())
 
             st.success(f"Account created successfully for {full_name}!")
-            st.session_state.signup_mode = False  # Close sign-up form after success
+            st.session_state.signup_mode = False
 
 # Profile Page
 if 'username' in st.session_state and st.session_state.get('show_profile', False):
     st.write("## Your Profile")
 
-    # Load current user's data
     current_user = users[st.session_state.username]
 
-    # Profile editing form
     with st.form("profile_form"):
         full_name = st.text_input("Full Name", value=current_user['full_name'])
         college = st.text_input("College", value=current_user['college'])
@@ -246,7 +241,6 @@ if 'username' in st.session_state and st.session_state.get('show_profile', False
         submit_profile = st.form_submit_button("Save Changes")
 
     if submit_profile:
-        # Update user profile
         users[st.session_state.username].update({
             'full_name': full_name,
             'college': college,
@@ -262,20 +256,17 @@ if 'username' in st.session_state and st.session_state.get('show_profile', False
             'bio': bio
         })
         print(users[st.session_state.username])
-        save_users(users)  # Save updated user data to JSON
+        save_users(users)
         st.success("Profile updated successfully!")
 
 
-# Main Application Logic
+# Main app logic
 if 'username' in st.session_state:
-    # Show conversation options if no conversation type is chosen yet
     if st.session_state.conversation_type is None:
         st.write("Hi, how may I assist you today?")
         
-    # Create columns for side-by-side buttons
     col1, col2, col3 = st.columns(3)
     
-    # Set the button states dynamically based on conversation_type
     with col1:
         st.button("I'm looking for an apartment", 
                   on_click=lambda: st.session_state.update({"conversation_type": "apartment"}),
@@ -291,15 +282,12 @@ if 'username' in st.session_state:
                   on_click=lambda: st.session_state.update({"conversation_type": "tech Support"}),
                   disabled=st.session_state.conversation_type is not None)
     
-    # Add a visual indicator for the selected option
     if st.session_state.conversation_type is not None:
         st.write(f"**Selected Option:** {st.session_state.conversation_type.replace('_', ' ').capitalize()}")
     
-    # Handling different conversation types
     if st.session_state.conversation_type == "apartment":
         st.write("*Please adjust the sliders and options to define your preferences.*")
     
-    # User Inputs for apartment
         price_range = st.slider("What is your budget range?", 500, 3000, (900, 1400))
         num_bedrooms = st.slider("How many bedrooms are you looking for?", 1, 6, (1,2))
         allow_pets = st.checkbox("Do you have a pet?")
@@ -320,33 +308,28 @@ if 'username' in st.session_state:
                 (apartment_data['Parking?'].astype(bool) == need_parking if need_parking else True) & 
                 (apartment_data['Gymnasium?'].astype(bool) == need_gym if need_gym else True)        
             ]
-            # Check if filtered apartments are available
             if not filtered_apartments.empty:
                 st.write("### Apartments that match your preferences:")
                 st.dataframe(filtered_apartments)
-                # Extract latitude and longitude
                 if 'Latitude' in filtered_apartments.columns and 'Longitude' in filtered_apartments.columns:
                     map_data = filtered_apartments[['Latitude', 'Longitude']].dropna()
                     map_data = map_data.rename(columns={'Latitude': 'latitude', 'Longitude': 'longitude'})
                     map_data = map_data.astype({'latitude': 'float', 'longitude': 'float'})
                     if not map_data.empty:
-                        # Define a Pydeck layer with smaller circle markers
                         layer = pdk.Layer(
                             'ScatterplotLayer',
                             data=map_data,
                             get_position='[longitude, latitude]',
-                            get_color='[200, 30, 0, 160]',  # Red color with some transparency
-                            get_radius=50,  # Radius of each circle (in meters)
-                            pickable=True,  # Enables interactivity
+                            get_color='[200, 30, 0, 160]',
+                            get_radius=50,
+                            pickable=True,
                         )
-                        # Create the Pydeck map
                         view_state = pdk.ViewState(
                             latitude=map_data['latitude'].mean(),
                             longitude=map_data['longitude'].mean(),
-                            zoom=12,  # Adjust zoom for a better view
+                            zoom=12,  # adjust zoom
                             pitch=0
                         )
-                        # Render the map with Pydeck
                         st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state))
                     else:
                         st.write("No valid coordinates available for the selected apartments.")
@@ -358,16 +341,15 @@ if 'username' in st.session_state:
     elif st.session_state.conversation_type == "roommate":
         st.write("*Finding a roommate based on your preferences...*")
 
-        # Load current user's data
         current_user = users[st.session_state.username]
 
-        # Ensure user is looking for a roommate
+        # user is looking for a roommate
         if current_user.get('looking_for_roommate') == "Yes":
-            # Filter matching users
+            # filter matching users
             matching_users = []
             for username, user_data in users.items():
                 if username != st.session_state.username and user_data.get('looking_for_roommate') == "Yes":
-                    # Check if the user fits the criteria
+                    # check if the user fits the criteria
                     count = 0
                     if user_data.get('smoking_habits') == current_user.get('roommate_smoking'):
                         count += 1
@@ -380,14 +362,11 @@ if 'username' in st.session_state:
                     if user_data.get('guest_preferences') == current_user.get('gatherings'):
                         count += 1
 
-                    # Append matching user and their match count
-                    if count > 0:  # Only add users with at least one match
+                    if count > 0:
                         matching_users.append((username, count))
 
-            # Sort matching users by count in descending order
             matching_users.sort(key=lambda x: x[1], reverse=True)
 
-            # Display matching users with "Simulate Conversation" button
             if matching_users:
                 for match, count in matching_users:
                     st.write(f"**Username**: {match}, **Matches**: {count}")
@@ -413,13 +392,13 @@ if 'username' in st.session_state:
                         # Prepare a prompt for the language model
                         # st.write("loading prompt")
                         prompt = f"""
-                                You are to simulate a conversation between two users who are meeting for the first time to discuss becoming roommates.
+                                You are to simulate a conversation between two users (you must use full names) who are meeting for the first time to discuss becoming roommates.
 
                                 {current_user_info}
 
                                 {matched_user_info}
 
-                                Please generate a conversation where each user speaks 3 lines in total. The conversation should reflect their personalities, preferences, and any common interests based on the profiles provided.
+                                Please generate a text conversation where each user speaks 10 lines in total. The conversation should reflect their personalities, preferences, and any common interests based on the profiles provided.
 
                                 Begin the conversation:
 
